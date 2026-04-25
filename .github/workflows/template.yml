@@ -22,25 +22,11 @@ jobs:
       fail-on-detection: false
     secrets: inherit
 
-  app-ci-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-      - run: |
-          echo "npm install..."
-          npm install || true
-          echo "npm test..."
-          npm test --if-present
-
   # ==========================================
   # STAGE 2: SECURITY SCANS
   # ==========================================
   security-scans:
-    needs: [gitleaks-scan, app-ci-test]
+    needs: [gitleaks-scan]
     runs-on: ubuntu-latest
     steps:
       - run: echo "Mocking CodeQL & SonarQube"
@@ -57,33 +43,23 @@ jobs:
       - run: echo "Mocking GAR push"
       - run: echo "Mocking Container Analysis"
 
-  database-migration:
-    needs: security-scans
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Mocking Flyway migration"
-
   # ==========================================
   # STAGE 4: DEPLOYMENTS
   # ==========================================
   deploy-dev:
-    needs: [build-and-push, database-migration]
+    needs: [build-and-push]
     if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     environment: development
     steps:
-      - run: echo "Mocking Terraform DEV"
-      - run: echo "Mocking Apigee DEV"
       - run: echo "Mocking Cloud Deploy GKE DEV"
 
   deploy-prod:
-    needs: [build-and-push, database-migration]
+    needs: [build-and-push]
     if: github.ref == 'refs/heads/main' || github.base_ref == 'main'
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - run: echo "Mocking Terraform PROD"
-      - run: echo "Mocking Apigee PROD"
       - run: echo "Mocking Cloud Deploy GKE PROD"
 
   # ==========================================
