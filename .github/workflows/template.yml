@@ -50,7 +50,7 @@ jobs:
     needs: [build-and-push]
     if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
-    environment: development
+
     steps:
       - run: echo "Mocking Cloud Deploy GKE DEV"
 
@@ -58,7 +58,7 @@ jobs:
     needs: [build-and-push]
     if: github.ref == 'refs/heads/main' || github.base_ref == 'main'
     runs-on: ubuntu-latest
-    environment: production
+
     steps:
       - run: echo "Mocking Cloud Deploy GKE PROD"
 
